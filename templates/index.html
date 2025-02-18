@@ -1,159 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Chatbot</title>
+    <title>Advanced AI Chatbot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-    <div class="chat-wrapper">
-        <div class="chat-header">
-            <div class="chat-header-title">
-                <i class="fas fa-robot"></i>
-                <h1>AI Assistant</h1>
+<body class="theme-light">
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-robot"></i> AI Chat</h2>
             </div>
-            <div class="chat-header-status online">
-                <span class="status-dot"></span>
-                <span class="status-text">Online</span>
+            <div class="sidebar-actions">
+                <button onclick="clearChat()" class="action-button">
+                    <i class="fas fa-trash"></i> New Chat
+                </button>
+                <button onclick="exportChat()" class="action-button">
+                    <i class="fas fa-download"></i> Export Chat
+                </button>
+                <button onclick="toggleTheme()" class="action-button" id="theme-toggle">
+                    <i class="fas fa-moon"></i> Toggle Theme
+                </button>
+            </div>
+            <div class="sidebar-footer">
+                <div class="model-info">
+                    <i class="fas fa-microchip"></i> Gemini Pro
+                </div>
             </div>
         </div>
 
-        <div class="chat-container">
-            <div id="chat-messages">
-                <div class="bot-message welcome-message">
-                    <div class="message-content">
-                        <i class="fas fa-robot bot-icon"></i>
-                        <div class="message-text">
-                            Hello! 👋 I'm your AI assistant. How can I help you today?
-                        </div>
-                    </div>
+        <!-- Main Chat Area -->
+        <div class="chat-wrapper">
+            <div class="chat-header">
+                <div class="chat-header-title">
+                    <i class="fas fa-comments"></i>
+                    <h1>Chat Session</h1>
+                </div>
+                <div class="chat-header-status online">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Online</span>
                 </div>
             </div>
 
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <textarea id="user-input" placeholder="Type your message..." rows="1"></textarea>
-                    <button id="send-button" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+            <div class="chat-container">
+                <div id="chat-messages">
+                    <div class="bot-message welcome-message">
+                        <div class="message-content">
+                            <i class="fas fa-robot bot-icon"></i>
+                            <div class="message-text">
+                                <h3>👋 Hello! I'm your AI assistant.</h3>
+                                <p>I can help you with:</p>
+                                <ul>
+                                    <li>Answering questions</li>
+                                    <li>Writing and analyzing code</li>
+                                    <li>Explaining complex topics</li>
+                                    <li>And much more!</li>
+                                </ul>
+                                <p>How can I assist you today?</p>
+                            </div>
+                        </div>
+                        <div class="message-timestamp">
+                            Just now
+                        </div>
+                    </div>
                 </div>
-                <div class="typing-indicator" style="display: none;">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea id="user-input" placeholder="Type your message... (Shift+Enter for new line)" rows="1"></textarea>
+                        <div class="input-actions">
+                            <button class="action-icon" onclick="toggleMic()" id="mic-button" title="Voice Input (Coming Soon)">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button id="send-button" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="typing-indicator" style="display: none;">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Auto-resize textarea
-        const textarea = document.getElementById('user-input');
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-            // Limit to 5 rows
-            const lineHeight = parseInt(getComputedStyle(this).lineHeight);
-            if (this.scrollHeight > lineHeight * 5) {
-                this.style.height = (lineHeight * 5) + 'px';
-                this.style.overflowY = 'auto';
-            }
-        });
-
-        function showTypingIndicator() {
-            document.querySelector('.typing-indicator').style.display = 'flex';
-        }
-
-        function hideTypingIndicator() {
-            document.querySelector('.typing-indicator').style.display = 'none';
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            
-            if (message) {
-                // Disable input and button while processing
-                input.disabled = true;
-                document.getElementById('send-button').disabled = true;
-
-                // Add user message to chat
-                addMessage(message, 'user-message');
-                
-                // Show typing indicator
-                showTypingIndicator();
-                
-                // Send message to server
-                fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message: message })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    hideTypingIndicator();
-                    addMessage(data.response, 'bot-message');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    hideTypingIndicator();
-                    addMessage('Sorry, I encountered an error. Please try again.', 'error-message');
-                })
-                .finally(() => {
-                    // Re-enable input and button
-                    input.disabled = false;
-                    document.getElementById('send-button').disabled = false;
-                    input.focus();
-                });
-
-                // Reset input and its height
-                input.value = '';
-                input.style.height = 'auto';
-            }
-        }
-
-        function addMessage(message, className) {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = className;
-
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-
-            if (className === 'bot-message') {
-                const botIcon = document.createElement('i');
-                botIcon.className = 'fas fa-robot bot-icon';
-                messageContent.appendChild(botIcon);
-            }
-
-            const messageText = document.createElement('div');
-            messageText.className = 'message-text';
-            messageText.textContent = message;
-            
-            messageContent.appendChild(messageText);
-            messageDiv.appendChild(messageContent);
-            
-            // Add with fade-in animation
-            messageDiv.style.opacity = '0';
-            chatMessages.appendChild(messageDiv);
-            
-            // Trigger reflow
-            messageDiv.offsetHeight;
-            messageDiv.style.opacity = '1';
-
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Handle Enter key (Shift+Enter for new line)
-        document.getElementById('user-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html> 

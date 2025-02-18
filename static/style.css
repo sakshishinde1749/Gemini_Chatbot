@@ -1,15 +1,34 @@
 :root {
+    /* Light theme colors */
     --primary-color: #2962ff;
     --primary-light: #768fff;
     --primary-dark: #0039cb;
     --background-color: #f5f7fb;
     --chat-background: #ffffff;
+    --sidebar-background: #f0f2f5;
     --user-message-bg: #e3f2fd;
-    --bot-message-bg: #f5f5f5;
+    --bot-message-bg: #ffffff;
     --text-color: #2c3e50;
     --text-light: #70757a;
     --border-color: #e0e0e0;
     --shadow-color: rgba(0, 0, 0, 0.1);
+    --code-background: #f8f9fa;
+    --error-color: #dc3545;
+    --success-color: #28a745;
+}
+
+/* Dark theme colors */
+.theme-dark {
+    --background-color: #1a1a1a;
+    --chat-background: #2d2d2d;
+    --sidebar-background: #252525;
+    --user-message-bg: #1e3a5f;
+    --bot-message-bg: #363636;
+    --text-color: #e0e0e0;
+    --text-light: #a0a0a0;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --code-background: #2b2b2b;
 }
 
 * {
@@ -23,35 +42,99 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
+    transition: background-color 0.3s ease;
 }
 
-.chat-wrapper {
-    max-width: 900px;
-    margin: 2rem auto;
+/* App Layout */
+.app-wrapper {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background: var(--sidebar-background);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.sidebar-actions {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
     background: var(--chat-background);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow-color);
-    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-button:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.model-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Chat Area */
+.chat-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--chat-background);
 }
 
 .chat-header {
-    background: var(--primary-color);
-    color: white;
+    background: var(--chat-background);
+    color: var(--text-color);
     padding: 1rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .chat-header-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.chat-header-title h1 {
-    font-size: 1.25rem;
-    font-weight: 600;
 }
 
 .chat-header-status {
@@ -64,21 +147,17 @@ body {
 .status-dot {
     width: 8px;
     height: 8px;
-    background: #4caf50;
+    background: var(--success-color);
     border-radius: 50%;
     animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
+/* Chat Messages */
 .chat-container {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    height: 600px;
+    overflow: hidden;
 }
 
 #chat-messages {
@@ -90,8 +169,9 @@ body {
 
 .user-message, .bot-message, .error-message {
     margin: 1rem 0;
-    max-width: 80%;
-    transition: opacity 0.3s ease;
+    max-width: 85%;
+    animation: fadeIn 0.3s ease;
+    position: relative;
 }
 
 .user-message {
@@ -105,10 +185,11 @@ body {
     margin-right: auto;
     background-color: var(--bot-message-bg);
     border-radius: 18px 18px 18px 4px;
+    border: 1px solid var(--border-color);
 }
 
 .message-content {
-    padding: 0.8rem 1.2rem;
+    padding: 1rem 1.2rem;
     display: flex;
     align-items: flex-start;
     gap: 0.8rem;
@@ -120,22 +201,44 @@ body {
     margin-top: 0.2rem;
 }
 
-.welcome-message {
-    border-left: 4px solid var(--primary-color);
+.message-text {
+    line-height: 1.5;
 }
 
-.error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    margin: 0.5rem auto;
-    padding: 0.8rem 1.2rem;
+.message-text p {
+    margin-bottom: 0.5rem;
+}
+
+.message-text ul, .message-text ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.message-timestamp {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+    padding: 0 1.2rem 0.5rem;
+}
+
+/* Code Blocks */
+.message-text pre {
+    background: var(--code-background);
     border-radius: 8px;
-    text-align: center;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
 }
 
+.message-text code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+}
+
+/* Input Area */
 .input-container {
     padding: 1rem 1.5rem;
-    background: white;
+    background: var(--chat-background);
     border-top: 1px solid var(--border-color);
 }
 
@@ -145,6 +248,7 @@ body {
     background: var(--background-color);
     border-radius: 24px;
     padding: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 #user-input {
@@ -153,9 +257,31 @@ body {
     background: transparent;
     padding: 0.5rem 1rem;
     font-size: 1rem;
+    color: var(--text-color);
     resize: none;
     max-height: 150px;
     outline: none;
+}
+
+.input-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.action-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.action-icon:hover {
+    color: var(--primary-color);
+    background: var(--user-message-bg);
 }
 
 #send-button {
@@ -166,7 +292,7 @@ body {
     width: 40px;
     height: 40px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -174,14 +300,16 @@ body {
 
 #send-button:hover {
     background: var(--primary-dark);
+    transform: scale(1.05);
 }
 
 #send-button:disabled {
     background: var(--text-light);
     cursor: not-allowed;
+    transform: none;
 }
 
-/* Typing indicator */
+/* Typing Indicator */
 .typing-indicator {
     display: flex;
     gap: 4px;
@@ -200,12 +328,24 @@ body {
 .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
 .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
 @keyframes bounce {
     0%, 80%, 100% { transform: scale(0); }
     40% { transform: scale(1); }
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
 }
@@ -223,19 +363,59 @@ body {
     background: var(--text-light);
 }
 
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .chat-wrapper {
-        margin: 0;
-        height: 100vh;
-        border-radius: 0;
+    .app-wrapper {
+        flex-direction: column;
     }
 
-    .chat-container {
-        height: calc(100vh - 60px);
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+
+    .sidebar-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .action-button {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .chat-wrapper {
+        height: calc(100vh - 200px);
     }
 
     .user-message, .bot-message {
         max-width: 90%;
     }
+}
+
+/* Welcome Message Styling */
+.welcome-message {
+    border-left: 4px solid var(--primary-color);
+    background: var(--bot-message-bg);
+    margin-bottom: 2rem;
+}
+
+.welcome-message .message-text h3 {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.welcome-message .message-text ul {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+/* Error Message Styling */
+.error-message {
+    background-color: var(--error-color);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    text-align: center;
+    margin: 0.5rem auto;
+    max-width: 80%;
 } 
